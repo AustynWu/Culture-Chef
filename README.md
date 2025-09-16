@@ -45,7 +45,6 @@ This prototype reflects our **group project proposal** (INFO6001/INFO7005 IT Pro
 
 ### 1. Clone the repository
 
-```bash
 
 ### 2. Install dependencies
 ```bash
