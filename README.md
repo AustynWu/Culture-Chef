@@ -45,6 +45,10 @@ This prototype reflects our **group project proposal** (INFO6001/INFO7005 IT Pro
 
 ### 1. Clone the repository
 
+```bash
+git clone https://github.com/your-repo/culture-chef-prototype.git
+cd culture-chef-prototype
+```
 
 ### 2. Install dependencies
 ```bash
@@ -58,6 +62,3 @@ npm run dev
 ```
 
 The app will be available at http://localhost:3000
-
-git clone https://github.com/your-repo/culture-chef-prototype.git
-cd culture-chef-prototype
