@@ -8,6 +8,10 @@ import "swiper/css";
 import "swiper/css/pagination";     
 import ReservationForm from "@/components/ReservationForm";
 
+// ← 跟 browse 一樣引入 framer-motion 與 fadeIn
+import { motion } from "framer-motion";
+import { fadeIn } from "@/lib/variants";
+
 export default function ChefProfile({ params }: { params: { id: string } }) 
 {
   const router = useRouter();
@@ -19,7 +23,13 @@ export default function ChefProfile({ params }: { params: { id: string } })
       <div className="container mx-auto">
         
         {/* ▶ 新增：行動列（固定在頁面上方；保持白卡+陰影風格） */}
-        <div className="max-w-[1000px] mx-auto sticky top-0 z-20">
+        <motion.div
+          variants={fadeIn("down", 0.05)}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: false, amount: 0.1 }}
+          className="max-w-[1000px] mx-auto sticky top-0 z-20"
+        >
           <div className="flex items-center justify-between bg-white/95 backdrop-blur rounded-2xl shadow-2xl px-[20px] py-[10px] mb-4">
             <button
               onClick={() => router.back()}
@@ -34,10 +44,16 @@ export default function ChefProfile({ params }: { params: { id: string } })
               Book now
             </Link>
           </div>
-        </div>
+        </motion.div>
         
         {/* 頁首：主圖 + 基本資訊 */}
-        <div className="max-w-[1000px] mx-auto bg-white shadow-2xl rounded-2xl overflow-hidden grid md:grid-cols-2">
+        <motion.div
+          variants={fadeIn("up", 0.05)}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: false, amount: 0.1 }}
+          className="max-w-[1000px] mx-auto bg-white shadow-2xl rounded-2xl overflow-hidden grid md:grid-cols-2"
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {/* 左邊：廚師照片 */}
             <div className="flex items-center justify-center p-4">
@@ -81,11 +97,17 @@ export default function ChefProfile({ params }: { params: { id: string } })
             </div>
             <div className="dishes-pagination flex justify-center gap-2 mt-2"></div>
             </div>
-        </div>
+        </motion.div>
 
         {/* 內容：主廚故事 + 菜單 */}
         <div className="max-w-[1000px] mx-auto mt-8 grid gap-8 md:grid-cols-2">
-          <div className="bg-white shadow-2xl rounded-2xl p-[24px]">
+          <motion.div
+            variants={fadeIn("right", 0.08)}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: false, amount: 0.1 }}
+            className="bg-white shadow-2xl rounded-2xl p-[24px]"
+          >
             <h2 className="mb-3">About the chef</h2>
             <p className="text-gray-700 leading-relaxed">{chef.bio ?? "Home-style dishes with seasonal ingredients."}</p>
             <br></br>
@@ -101,11 +123,18 @@ export default function ChefProfile({ params }: { params: { id: string } })
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
 
                 {/* Reserve */}
             {/* <div id="reserve" className="max-w-[500px] mx-auto mt-8 md:col-span-2"> */}
-              <div id="reserve" className="bg-white shadow-2xl rounded-2xl p-[24px]">
+              <motion.div
+                id="reserve"
+                variants={fadeIn("left", 0.1)}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: false, amount: 0.1 }}
+                className="bg-white shadow-2xl rounded-2xl p-[24px]"
+              >
                 <h2 className="mb-6">Reserve with {chef.name}</h2>
 
                 {/* 內部橫排：左表單 / 右側說明（或顯示價格、小計等） */}
@@ -115,7 +144,7 @@ export default function ChefProfile({ params }: { params: { id: string } })
                     <ReservationForm chefId={chef.id} chefName={chef.name} />
                   </div>
                 {/* </div> */}
-              </div>
+              </motion.div>
             {/* </div> */}
 
 

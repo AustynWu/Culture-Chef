@@ -96,7 +96,7 @@ bio: "Traditional Italian comfort classics from Nonna’s recipe book. Simple, h
     ],
     dishlocate:"/Italian_food",
         dishes: ["download (1).jpg", "download (2).jpg", "download (3).jpg",
-        "download.jpg","images.JPG", 
+        "download.jpg","images.jpg", 
     ]
   },
   {
