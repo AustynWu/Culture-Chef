@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "preview:static": "npx serve -s out -l 5173"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.0.2",
