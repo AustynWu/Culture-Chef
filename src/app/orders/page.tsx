@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { motion } from "framer-motion"
 
 type ServiceType = "pickup" | "at_home";
 type OrderStatus = "awaiting_chef" | "processing" | "completed" | "cancelled";
@@ -144,7 +145,12 @@ export default function OrdersPage() {
     <main className="py-12 xl:py-24 bg-menu">
       <div className="container mx-auto max-w-[1000px]">
         {/* Top bar (keeps the page.tsx vibe) */}
-        <div className="mb-6 flex items-center justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-6 flex items-center justify-between"
+        >
           <h1 className="text-2xl font-bold">My Orders</h1>
           <div className="flex items-center gap-3">
             <Link href="/browse" className="rounded-lg border px-4 py-2 bg-white text-black 
@@ -152,10 +158,15 @@ export default function OrdersPage() {
               ← Back to browse
             </Link>
           </div>
-        </div>
+        </motion.div>
 
         {/* Tabs: Active / History */}
-        <div className="mb-6 inline-flex rounded-xl border bg-white p-1 shadow">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mb-6 inline-flex rounded-xl border bg-white p-1 shadow"
+        >
           <button
             onClick={() => setTab("active")}
             className={`px-4 py-2 rounded-lg text-sm ${tab === "active" ? "bg-black text-white" : "hover:bg-gray-50"}`}
@@ -168,14 +179,20 @@ export default function OrdersPage() {
           >
             History ({history.length})
           </button>
-        </div>
+        </motion.div>
 
         {/* Order list */}
         <div className="grid gap-4">
-          {list.map((o) => {
+          {list.map((o, i) => {
             const s = statusMeta[o.status];
             return (
-              <div key={o.id} className="bg-white rounded-2xl shadow-2xl p-4 md:p-5 border">
+              <motion.div
+                key={o.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: i * 0.1 }} // i 是 map 的索引
+                className="bg-white rounded-2xl shadow-2xl p-4 md:p-5 border"
+              >
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   {/* Left: main info */}
                   <div className="min-w-0">
@@ -246,14 +263,19 @@ export default function OrdersPage() {
                   <span>·</span>
                   <span>Updated: —</span>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
 
         {/* Empty state */}
         {list.length === 0 && (
-          <div className="text-center py-20">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="text-center py-20"
+          >
             <p className="text-gray-600">
               {tab === "active" ? "You have no active orders right now." : "No past orders yet."}
             </p>
@@ -262,7 +284,7 @@ export default function OrdersPage() {
                 Browse chefs
               </Link>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
     </main>
