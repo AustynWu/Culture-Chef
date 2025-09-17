@@ -12,9 +12,8 @@ export default function Home() {
       <Header />
       <Hero />
       <MenuBar />
-      <Reservation />
       <About />
-      <Footer />
+      {/* <Footer /> */}
     </main>
   );
 }

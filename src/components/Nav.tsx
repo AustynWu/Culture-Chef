@@ -1,42 +1,33 @@
-import { Link, Link as ScrollLink } from "react-scroll";
-
-interface InternalLinkProps {
-  path: string;
-  offset?: number;
-}
+"use client";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const links = [
-  { path: "home", name: "Home", offset: -50 },
-  { path: "menu", name: "Menu", offset: -50 },
-  { path: "about", name: "About", offset: -150 },
-  { path: "more", name: "More", offset: 0 },
-  // { path: "reservation", name: "reservation", offset: 50 },
+  { hash: "#home",  name: "Home" },
+  { hash: "#menu",  name: "Menu" },
+  { hash: "browse", name: "Chefs" },
+  { hash: "orders",  name: "Order" },
+  { hash: "#about", name: "About" },
+  { hash: "#more",  name: "More" },
 ];
 
-const Nav = ({
+export default function Nav({
   containerStyles,
   linkStyles,
 }: {
   containerStyles: string;
   linkStyles: string;
-}) => {
+}) {
+  const pathname = usePathname();
+  const prefix = pathname === "/" ? "" : "/"; // 不在首頁就加 "/"
+
   return (
-    <nav className={`${containerStyles}`}>
-      {links.map((link, index) => (
-        <Link
-          key={index}
-          to={link.path}
-          spy={true}
-          smooth={true}
-          offset={link.offset}
-          duration={500}
-          className={`${linkStyles}`}
-        >
-          {link.name}
+    <nav className={containerStyles}>
+      {links.map((l) => (
+        <Link key={l.hash} href={`${prefix}${l.hash}`} className={linkStyles}>
+          {l.name}
         </Link>
       ))}
     </nav>
   );
-};
-
-export default Nav;
+}

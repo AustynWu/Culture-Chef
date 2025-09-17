@@ -12,21 +12,21 @@ const About = () => {
       id="about"
     >
       <motion.div
-        variants={fadeIn("up", 0.3)}
+        variants={fadeIn("up", 0.1)}
         initial="hidden"
         whileInView={"show"}
-        viewport={{ once: false, amount: 0.3 }}
+        viewport={{ once: false, amount: 0.1 }}
         className="xl: pl-[135px]"
       >
         <h1 className="mb-10">
           Let's enjoy with <span className="text-orange">Culture Chef</span>{" "}
         </h1>
         <p className="mb-30">
-          invite familiar falvor to your place
+          invite familiar flavor to your place
         </p>
 
         <p className="mb-10">
-          enjoy the Memoriable falvor
+          enjoy the Memorable flavor
         </p>
         <Button> Read more</Button>
       </motion.div>
@@ -37,7 +37,7 @@ const About = () => {
         viewport={{ once: false, amount: 0.2 }}
       >
         <Image
-          src="/about/personal chief.jpg"
+          src="/about/aboutculturechef.jpeg"
           width={705}
           height={771}
           alt=""

@@ -29,7 +29,7 @@ const Map = () => {
           <div className="flex flex-col justify-between xl:flex-row">
             <div className="w-[300px] mb-8 xl:mb-0">
               <Link href="/">
-                <Image src="/logo3.png" width={50} height={20} alt="image" />
+                <Image src="/culturechef2.png" width={100} height={100} alt="image" />
               </Link>
             </div>
             {/* grid Items  */}

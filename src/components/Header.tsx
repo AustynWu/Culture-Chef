@@ -11,19 +11,19 @@ import { Button } from "./ui/button";
 import NavMobile from "./NavMobile";
 
 const Header = () => {
-  const [active, setActive] = useState(false);
+  const [active, setActive] = useState(true);
 
   useEffect(() => {
-    const handleScroll = () => {
-      // scroll detection
-      setActive(window.scrollY > 100);
-    };
-    //event listener (add)
-    window.addEventListener("scroll", handleScroll);
+    // const handleScroll = () => {
+    //   // scroll detection
+    //   //setActive(window.scrollY > 100);
+    // };
+    // //event listener (add)
+    // window.addEventListener("scroll", handleScroll);
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    // return () => {
+    //   window.removeEventListener("scroll", handleScroll);
+    // };
   }, []);
 
   return (
@@ -36,7 +36,7 @@ const Header = () => {
         <div className="flex items-center justify-between">
           {/* logo */}
           <Link href="/">
-            <Image src="/logo3.png" width={30} height={30} alt="" />
+            <Image src="/culturechef2.png" width={80} height={80} alt="" />
           </Link>
           {/* navbar */}
           <Nav
@@ -45,9 +45,9 @@ const Header = () => {
           />
           {/* button */}
           <ScrollLink to="reservation" smooth={true}>
-            <Button className="rounded" variant="orange" size="sm">
+            {/* <Button className="rounded" variant="orange" size="sm">
               Book a table
-            </Button>
+            </Button> */}
           </ScrollLink>
           {/* navMobile */}
           <NavMobile

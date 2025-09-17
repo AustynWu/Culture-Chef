@@ -14,7 +14,7 @@ const buttonVariants = cva(
        input: 'bg-white/5 border border-white/10 text-white',
       },
       size: {
-        default: "w-{170px] h-[62px] px-6",
+        default: "w-[170px] h-[62px] px-6",
         sm: "w-[150px] h-[58px] px-6",
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",

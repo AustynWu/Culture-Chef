@@ -40,6 +40,6 @@ label{
    @apply text-orange
 }
 
-
+html { scroll-behavior: smooth; }
 
 }
