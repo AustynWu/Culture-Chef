@@ -44,7 +44,7 @@ const menuBar = [
     img: "/menu/item-4.png",
     title: "Mei Chen — Japanese Comfort",
     price: "from $15",
-    href: "/chef/mei-chen",
+    href: "/chef/sakura-tanaka",
     dishes: ["/japenese_food/download.jpg", "/japenese_food/download (4).jpg", "/japenese_food/images (1).jpg"]
   },
 ];
