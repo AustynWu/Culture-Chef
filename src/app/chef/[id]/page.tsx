@@ -102,7 +102,7 @@ export default function ChefProfile({ params }: { params: { id: string } })
         {/* 內容：主廚故事 + 菜單 */}
         <div className="max-w-[1000px] mx-auto mt-8 grid gap-8 md:grid-cols-2">
           <motion.div
-            variants={fadeIn("right", 0.08)}
+            variants={fadeIn("up", 0.08)}
             initial="hidden"
             whileInView="show"
             viewport={{ once: false, amount: 0.1 }}
@@ -129,7 +129,7 @@ export default function ChefProfile({ params }: { params: { id: string } })
             {/* <div id="reserve" className="max-w-[500px] mx-auto mt-8 md:col-span-2"> */}
               <motion.div
                 id="reserve"
-                variants={fadeIn("left", 0.1)}
+                variants={fadeIn("up", 0.1)}
                 initial="hidden"
                 whileInView="show"
                 viewport={{ once: false, amount: 0.1 }}
