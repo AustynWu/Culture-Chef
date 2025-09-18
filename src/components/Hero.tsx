@@ -26,7 +26,7 @@ const Hero = () => {
               viewport={{ once: false, amount: 0.1 }}
               className="text-white mb-7"
             >
-              Authentic <br /> flavors
+              Authentic <br /> Flavors
             </motion.h1>
             <motion.p
               variants={fadeIn("down", 0.1)}
@@ -56,7 +56,7 @@ const Hero = () => {
               {/* <Button className=" transition hover:ease-in-out duration-500 rounded ">
                 Let's eat
               </Button> */}
-              <Link href="#menu" className="inline-flex items-center rounded-lg bg-orange text-white px-10 py-5 hover:opacity-90">
+              <Link href="/browse" className="inline-flex items-center rounded-lg bg-orange text-white px-10 py-5 hover:opacity-90">
                 Find chefs
               </Link>
             </motion.div>
