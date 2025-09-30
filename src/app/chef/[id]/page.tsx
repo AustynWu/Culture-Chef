@@ -7,7 +7,7 @@ import { Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";     
 import ReservationForm from "@/components/ReservationForm";
-
+import { useMode } from "@/components/mode-context";
 // ← 跟 browse 一樣引入 framer-motion 與 fadeIn
 import { motion } from "framer-motion";
 import { fadeIn } from "@/lib/variants";
@@ -15,6 +15,8 @@ import { fadeIn } from "@/lib/variants";
 export default function ChefProfile({ params }: { params: { id: string } }) 
 {
   const router = useRouter();
+  const { mode } = useMode();
+
   const chef = chefs.find(c => c.id === params.id);
   if (!chef) return <main className="p-6">Chef not found.</main>;
 
@@ -37,12 +39,23 @@ export default function ChefProfile({ params }: { params: { id: string } })
             >
               ← Back
             </button>
-            <Link
+
+            <div className="flex items-center gap-2">
+              {/* Show Edit only when Chef Mode is active */}
+              {mode === "chef" && (
+              <button
+              onClick={() => router.push(`/chefs/manage?id=${chef.id}`)}
+              className="text-sm px-3 py-1.5 rounded-lg border bg-black text-white hover:opacity-90"
+              >
+              Edit
+              </button>
+              )}
+              <Link
               href="#reserve"             // 捲到本頁預約表單（靜態）
-              className="text-sm px-4 py-1.5 rounded-lg bg-black text-white hover:opacity-90"
-            >
+              className="text-sm px-4 py-1.5 rounded-lg bg-black text-white hover:opacity-90">
               Book now
             </Link>
+            </div>
           </div>
         </motion.div>
         

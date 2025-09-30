@@ -8,10 +8,13 @@ import { Link as ScrollLink } from "react-scroll";
 import { useState } from "react";
 import Nav from "./Nav";
 import { Button } from "./ui/button";
+import { useMode } from "@/components/mode-context";
 import NavMobile from "./NavMobile";
 
 const Header = () => {
   const [active, setActive] = useState(true);
+
+  const { mode, toggle } = useMode();
 
   useEffect(() => {
     // const handleScroll = () => {
@@ -49,6 +52,19 @@ const Header = () => {
               Book a table
             </Button> */}
           </ScrollLink>
+
+          {/* Toggle: User ↔ Chef Mode (prototype) */}
+          {/* <button
+            onClick={toggle}
+            className={`ml-3 text-sm px-3 py-1.5 rounded-lg border transition ${
+            mode === "chef" ? "bg-white text-black" : "bg-transparent text-white hover:bg-white/10"
+            }`}
+            aria-pressed={mode === "chef"}
+            title={mode === "chef" ? "Chef Mode (on)" : "User Mode (on)"}
+            >
+            {mode === "chef" ? "Chef" : "User"}
+          </button> */}
+
           {/* navMobile */}
           <NavMobile
             containerStyles="xl:hidden"

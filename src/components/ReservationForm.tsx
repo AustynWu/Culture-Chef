@@ -78,7 +78,7 @@ const ReservationForm = ({ chefId, chefName }: Props) => {
           <PopoverTrigger asChild>
             {/* 重要：Button 預設 variant="input" 是白字，我們用 className 覆蓋成白底黑字 */}
             <Button
-              variant="input"
+              //variant="input"
               className={cn(
                 "justify-start text-left font-normal", // 日期想要靠左可保留
                 fieldBase.replace("justify-between", "justify-start") // 讓它也是 flex 而非 inline-flex

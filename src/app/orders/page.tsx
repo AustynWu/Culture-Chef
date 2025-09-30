@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion"
+import { useRouter } from "next/navigation";
 
 type ServiceType = "pickup" | "at_home";
 type OrderStatus = "awaiting_chef" | "processing" | "completed" | "cancelled";
@@ -86,8 +87,8 @@ const ORDERS: Order[] = [
     time: "13:00",
     people: 6,
     service: "pickup",
-    chefName: "Hassan Ali",
-    chefId: "hassan-ali",
+    chefName: "Ali Hassan",
+    chefId: "ali-hassan",
     status: "completed",
     total: 168,
     notes: "Family lunch; extra pita if possible."
@@ -129,17 +130,103 @@ const statusMeta: Record<OrderStatus, { label: string; className: string }> = {
   cancelled:     { label: "Cancelled",                      className: "bg-gray-100 text-gray-700 border-gray-200"  },
 };
 
+// 若你的公開頁是 /chef/[id]（單數），把這行改成 `/chef/${id}`
+const chefProfileUrl = (id?: string) => (id ? `/chef/${id}` : "/browse");
+
+// 簡易黑/白主題 Modal（不依賴其他 UI 套件）
+function Modal({
+  open, title, children, onClose,
+}: { open: boolean; title: string; children: React.ReactNode; onClose: () => void }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4">
+      <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b px-5 py-3">
+          <h3 className="font-semibold">{title}</h3>
+          <button onClick={onClose} className="text-sm rounded-md px-2 py-1 hover:bg-gray-100">✕</button>
+        </div>
+        <div className="px-5 py-4">{children}</div>
+      </div>
+    </div>
+  );
+}
+
 export default function OrdersPage() {
+
+  const router = useRouter();
+  // 用 state 管理列表，之後要接 CSV / API 只要換成載入資料
+  const [orders, setOrders] = useState(ORDERS);
   const [tab, setTab] = useState<"active" | "history">("active");
 
-  // split into Active vs History (richer UX from copy file, English copy + page style)
+  // modal 狀態
+  const [modal, setModal] = useState<
+    | { type: "cancel"; order: Order }
+    | { type: "message"; order: Order }
+    | { type: "contact"; order: Order }
+    | { type: "review"; order: Order }
+    | null
+  >(null);
+
+  // modal 內的暫存欄位
+  const [messageText, setMessageText] = useState("");
+  const [reviewText, setReviewText] = useState("");
+  const [rating, setRating] = useState(5);
+
+  // 就地編輯 notes
+  const [editingNotesId, setEditingNotesId] = useState<string | null>(null);
+  const [notesDraft, setNotesDraft] = useState("");
+
+  // 依狀態切分清單 // split into Active vs History (richer UX from copy file, English copy + page style)
   const { active, history } = useMemo(() => {
-    const active = ORDERS.filter(o => o.status === "awaiting_chef" || o.status === "processing");
-    const history = ORDERS.filter(o => o.status === "completed" || o.status === "cancelled");
+    const active = orders.filter(o => o.status === "awaiting_chef" || o.status === "processing");
+    const history = orders.filter(o => o.status === "completed" || o.status === "cancelled");
     return { active, history };
-  }, []);
+  }, [orders]);
 
   const list = tab === "active" ? active : history;
+
+  // 共用：更新某筆訂單（以 id）
+  function updateOrder(id: string, patch: Partial<Order>) {
+    setOrders(prev => prev.map(o => (o.id === id ? { ...o, ...patch } : o)));
+  }
+
+  // 動作處理
+  function handleCancelConfirm(order: Order) {
+    updateOrder(order.id, { status: "cancelled" });
+    setModal(null);
+  }
+  
+  function openMessage(order: Order) {
+    setMessageText("");
+    setModal({ type: "message", order });
+  }
+  function openContact(order: Order) {
+    setMessageText("");
+    setModal({ type: "contact", order });
+  }
+  function submitMessage() {
+    // TODO: 將 messageText 存 CSV / 呼叫 API
+    setModal(null);
+  }
+
+  function openReview(order: Order) {
+    setRating(5);
+    setReviewText("");
+    setModal({ type: "review", order });
+  }
+  function submitReview() {
+    // TODO: 將 rating + reviewText 存 CSV / 呼叫 API
+    setModal(null);
+  }
+
+  function startEditNotes(order: Order) {
+    setEditingNotesId(order.id);
+    setNotesDraft(order.notes ?? "");
+  }
+  function saveNotes(order: Order) {
+    updateOrder(order.id, { notes: notesDraft });
+    setEditingNotesId(null);
+  }
 
   return (
     <main className="py-12 xl:py-24 bg-menu">
@@ -205,10 +292,19 @@ export default function OrdersPage() {
                       {o.date} {o.time} · {o.people} people · {o.service === "pickup" ? "Pickup" : "At home"}
                       {o.location ? ` · ${o.location}` : ""}
                     </div>
-                    {o.notes && (
-                      <p className="mt-1 text-sm text-gray-500 line-clamp-2">
-                        Notes: {o.notes}
-                      </p>
+                    {/* Left: main info ... */}
+                    {editingNotesId === o.id ? (
+                      <div className="mt-2">
+                        <textarea
+                          rows={3}
+                          className="w-full rounded-lg border px-3 py-2 text-sm"
+                          value={notesDraft}
+                          onChange={(e) => setNotesDraft(e.target.value)}
+                          placeholder="Update your notes for this order..."
+                        />
+                      </div>
+                    ) : (
+                      o.notes && <p className="mt-1 text-sm text-gray-500">Notes: {o.notes}</p>
                     )}
                   </div>
 
@@ -216,40 +312,78 @@ export default function OrdersPage() {
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="font-semibold text-orange">${o.total}</span>
 
-                    {/* View chef (placeholder to /browse for now) */}
+                    {/* View chef：依訂單的 chefId 生成連結；沒有就退回 /browse */}
                     <Link
-                      href="/browse"
-                      className="rounded-lg border px-3 py-1.5 text-sm bg-white hover:bg-gray-50"
+                      href={chefProfileUrl(o.chefId)}
+                      className="rounded-lg px-3 py-1.5 text-sm border text-black hover:text-orange-400 transition-colors"
+                      aria-label={`View chef ${o.chefName}`}
                     >
                       View chef
                     </Link>
 
                     {o.status === "awaiting_chef" && (
                       <>
-                        <button className="rounded-lg bg-black text-white px-3 py-1.5 text-sm hover:opacity-90">
+                        <button
+                          className="rounded-lg bg-black text-white px-3 py-1.5 text-sm hover:opacity-90 hover:text-orange-400"
+                          onClick={() => setModal({ type: "cancel", order: o })}
+                        >
                           Cancel request
                         </button>
-                        <button className="rounded-lg px-3 py-1.5 text-sm border bg-white hover:bg-gray-50">
+                        <button
+                          className="rounded-lg px-3 py-1.5 text-sm border bg-white hover:text-orange-400"
+                          onClick={() => openMessage(o)}
+                        >
                           Message chef
                         </button>
                       </>
                     )}
+
                     {o.status === "processing" && (
                       <>
-                        <button className="rounded-lg bg-black text-white px-3 py-1.5 text-sm hover:opacity-90">
+                        <button
+                          className="rounded-lg bg-black text-white px-3 py-1.5 text-sm hover:opacity-90 hover:text-orange-400"
+                          onClick={() => openContact(o)}
+                        >
                           Contact chef
                         </button>
-                        <button className="rounded-lg px-3 py-1.5 text-sm border bg-white hover:bg-gray-50">
-                          Update notes
-                        </button>
+                        {editingNotesId === o.id ? (
+                          <div className="flex items-center gap-2">
+                            <button
+                              className="rounded-lg bg-black text-white px-3 py-1.5 text-sm hover:opacity-90"
+                              onClick={() => saveNotes(o)}
+                            >
+                              Save
+                            </button>
+                            <button
+                              className="rounded-lg px-3 py-1.5 text-sm border bg-white hover:text-orange-400"
+                              onClick={() => { setEditingNotesId(null); setNotesDraft(""); }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            className="rounded-lg px-3 py-1.5 text-sm border bg-white hover:text-orange-400"
+                            onClick={() => startEditNotes(o)}
+                          >
+                            Update notes
+                          </button>
+                        )}
                       </>
                     )}
+
                     {o.status === "completed" && (
                       <>
-                        <button className="rounded-lg px-3 py-1.5 text-sm border bg-white hover:bg-gray-50">
+                        <button
+                          className="rounded-lg px-3 py-1.5 text-sm bg-black text-white hover:text-orange-400"
+                          onClick={() => router.push(chefProfileUrl(o.chefId))}
+                        >
                           Rebook
                         </button>
-                        <button className="rounded-lg px-3 py-1.5 text-sm border bg-white hover:bg-gray-50">
+                        <button
+                          className="rounded-lg px-3 py-1.5 text-sm border bg-white hover:text-orange-400"
+                          onClick={() => openReview(o)}
+                        >
                           Leave a review
                         </button>
                       </>
@@ -287,6 +421,89 @@ export default function OrdersPage() {
           </motion.div>
         )}
       </div>
+
+      {/* Cancel modal */}
+      <Modal
+        open={!!modal && modal.type === "cancel"}
+        title="Cancel this request?"
+        onClose={() => setModal(null)}
+      >
+        <p className="text-sm text-gray-600">
+          Are you sure you want to cancel this order?
+        </p>
+        <div className="mt-4 flex justify-end gap-2">
+          <button className="rounded-lg px-3 py-1.5 text-sm border" onClick={() => setModal(null)}>
+            No
+          </button>
+          {!!modal && modal.type === "cancel" && (
+            <button
+              className="rounded-lg px-3 py-1.5 text-sm bg-black text-white"
+              onClick={() => handleCancelConfirm(modal.order)}
+            >
+              Yes, cancel
+            </button>
+          )}
+        </div>
+      </Modal>
+
+      {/* Message / Contact modal（共用） */}
+      <Modal
+        open={!!modal && (modal.type === "message" || modal.type === "contact")}
+        title={modal?.type === "contact" ? "Contact chef" : "Message chef"}
+        onClose={() => setModal(null)}
+      >
+        <textarea
+          rows={5}
+          className="w-full rounded-lg border px-3 py-2 text-sm"
+          value={messageText}
+          onChange={(e) => setMessageText(e.target.value)}
+          placeholder="Type your message…"
+        />
+        <div className="mt-4 flex justify-end gap-2">
+          <button className="rounded-lg px-3 py-1.5 text-sm border" onClick={() => setModal(null)}>
+            Cancel
+          </button>
+          <button className="rounded-lg px-3 py-1.5 text-sm bg-black text-white" onClick={submitMessage}>
+            Send
+          </button>
+        </div>
+      </Modal>
+
+      {/* Review modal */}
+      <Modal
+        open={!!modal && modal.type === "review"}
+        title="Leave a review"
+        onClose={() => setModal(null)}
+      >
+        <div className="flex items-center gap-2">
+          {[1,2,3,4,5].map(n => (
+            <button
+              key={n}
+              onClick={() => setRating(n)}
+              className={`h-8 w-8 rounded-full border flex items-center justify-center ${n <= rating ? "bg-black text-white" : "bg-white text-black"}`}
+              aria-label={`Rate ${n}`}
+            >
+              ★
+            </button>
+          ))}
+          <span className="text-sm text-gray-600 ml-2">{rating}/5</span>
+        </div>
+        <textarea
+          rows={4}
+          className="mt-3 w-full rounded-lg border px-3 py-2 text-sm"
+          value={reviewText}
+          onChange={(e) => setReviewText(e.target.value)}
+          placeholder="Share your experience…"
+        />
+        <div className="mt-4 flex justify-end gap-2">
+          <button className="rounded-lg px-3 py-1.5 text-sm border" onClick={() => setModal(null)}>
+            Cancel
+          </button>
+          <button className="rounded-lg px-3 py-1.5 text-sm bg-black text-white" onClick={submitReview}>
+            Submit
+          </button>
+        </div>
+      </Modal>
     </main>
   );
 }

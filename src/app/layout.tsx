@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Lora, Poppins } from "next/font/google";
+import Providers from "./providers";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -31,10 +32,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${lora.variable} ${poppins.variable}`}>
+        <Providers>
         <Header /> 
         {children}
         <Footer /> 
-        </body>
+        </Providers>
+      </body>
     </html>
   );
 }

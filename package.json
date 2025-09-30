@@ -10,12 +10,15 @@
     "preview:static": "npx serve -s out -l 5173"
   },
   "dependencies": {
-    "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-avatar": "^1.1.10",
+    "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-popover": "^1.0.7",
     "@radix-ui/react-select": "^2.0.0",
-    "@radix-ui/react-slot": "^1.0.2",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.0",
+    "@radix-ui/react-separator": "^1.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-tabs": "^1.1.13",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "date-fns": "^3.3.0",
     "framer-motion": "^10.18.0",
     "leaflet": "^1.9.4",
@@ -30,7 +33,7 @@
     "react-responsive": "^9.0.2",
     "react-scroll": "^1.9.0",
     "swiper": "^12.0.1",
-    "tailwind-merge": "^2.2.0",
+    "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
