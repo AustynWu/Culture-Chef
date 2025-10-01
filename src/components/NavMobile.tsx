@@ -92,7 +92,9 @@ const NavMobile = ({
             })}
           </div>
           <ScrollLink to="reservation" smooth offset={-150}>
-            <Button className="rounded mb-1" variant="orange">
+            <Button className="rounded mb-1" 
+            //variant="default"
+            >
               Book a table
             </Button>
           </ScrollLink>
