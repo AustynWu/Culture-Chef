@@ -29,11 +29,31 @@ function formatDateYMD(iso: string) {
 // calculate the rating star
 function useChefReviewStats(chefId: string) {
   const [local, setLocal] = useState<Review[]>([]);
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+
+  const readLocal = () => {
     const key = `reviews:${chefId}`;
     const list = JSON.parse(localStorage.getItem(key) || "[]");
     setLocal(list);
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    readLocal();
+
+    // 同頁面也會收到（我們會手動 dispatch）
+    const onCustom = () => readLocal();
+
+    // 其他分頁修改時會觸發 storage 事件
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === `reviews:${chefId}`) readLocal();
+    };
+
+    window.addEventListener("reviews-changed", onCustom as EventListener);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("reviews-changed", onCustom as EventListener);
+      window.removeEventListener("storage", onStorage);
+    };
   }, [chefId]);
 
   const merged = useMemo(() => {
@@ -49,6 +69,7 @@ function useChefReviewStats(chefId: string) {
   return { avg, count: merged.length };
 }
 
+
 // read local review data
 function ReviewsList({ chefId }: { chefId: string }) {
   const [local, setLocal] = useState<Review[]>([]);
@@ -60,6 +81,16 @@ function ReviewsList({ chefId }: { chefId: string }) {
     const list = JSON.parse(localStorage.getItem(key) || "[]");
     setLocal(list);
   }, [chefId]);
+
+  // 刪除本地評論
+  const deleteLocalReview = (id: string) => {
+    const key = `reviews:${chefId}`;
+    const list: Review[] = JSON.parse(localStorage.getItem(key) || "[]");
+    const next = list.filter((r) => r.id !== id);
+    localStorage.setItem(key, JSON.stringify(next));
+    setLocal(next);                                 // 立即刷新本列表
+    window.dispatchEvent(new Event("reviews-changed")); // 通知抬頭星等重算
+  };
 
   // 合併：localStorage（最新） + 種子
   const merged = useMemo(() => {
@@ -74,7 +105,9 @@ function ReviewsList({ chefId }: { chefId: string }) {
 
   return (
     <div className="grid gap-3 max-h-[360px] overflow-y-auto pr-2">
-      {merged.map((r) => (
+      {merged.map((r) => {
+        const isLocal = local.some((x) => x.id === r.id); // 只有本地的能刪
+        return (
         <div key={r.id} className="rounded-xl border p-4 flex gap-3 items-start">
           {/* avatar 先用姓名縮寫 */}
           <div className="h-10 w-10 shrink-0 rounded-full bg-gray-200 flex items-center justify-center font-semibold text-gray-700">
@@ -89,6 +122,15 @@ function ReviewsList({ chefId }: { chefId: string }) {
               <span className="ml-auto text-xs text-gray-500 tabular-nums min-w-[88px] text-right">
                 {formatDateYMD(r.createdAt)}
               </span>
+              {isLocal && (
+                  <button
+                    onClick={() => deleteLocalReview(r.id)}
+                    className="ml-2 rounded-lg border px-2 py-1 text-xs hover:bg-gray-50"
+                    title="Delete this review"
+                  >
+                    Delete
+                  </button>
+                )}
             </div>
 
             <div className="mt-0.5 text-orange">
@@ -100,7 +142,8 @@ function ReviewsList({ chefId }: { chefId: string }) {
             )}
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
