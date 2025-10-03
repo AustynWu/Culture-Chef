@@ -6,7 +6,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { fadeIn } from "../../lib/variants";
-import { chefs } from "@/data/chefs";
+import Modal from "@/components/Modal";
+import { chefsWithGeo as chefs } from "@/data/chefs";
+import dynamic from "next/dynamic";
+
 
 // 最小型別（避免你的 data 欄位沒有就報錯）
 type MenuItem = { title?: string; desc?: string; price?: number };
@@ -20,6 +23,15 @@ type Chef = {
   priceRange?: "$" | "$$" | "$$$";
   menu?: MenuItem[];
 };
+
+const ChefMap = dynamic(() => import("@/components/ChefMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[420px] flex items-center justify-center text-sm text-gray-500">
+      Loading map…
+    </div>
+  ),
+});
 
 export default function BrowsePage() {
   // 從資料動態萃取菜系（去重）
@@ -48,6 +60,11 @@ export default function BrowsePage() {
     return "from $--";
   };
 
+  // chefmap distance and information
+  const [sorted, setSorted] = useState<(Chef & {distance?: number})[]>([]);
+  // component 內：加一個 state
+  const [mapOpen, setMapOpen] = useState(false);
+
   return (
     <section className="relative isolate  py-12 xl:py-24 bg-menu" id="browse">
       <div className="container mx-auto">
@@ -58,14 +75,23 @@ export default function BrowsePage() {
           initial="hidden"
           whileInView={"show"}
           viewport={{ once: false, amount: 0.1 }}
-          className="max-w-[570px] text-left xl:text-left relative z-10"
+          className=" text-left xl:text-left relative z-10"
         >
-          <div>
-            <h2 className="mb-3"> All Chefs </h2>
-            <div className="text-green flex justify-start items-center mb-8">
-              Browse & filter by cuisine
+          {/* Title row + Map button */}
+          <div className="mr-auto px-4 mb-6 flex items-end justify-between">
+            <div>
+              <h2 className="text-3xl font-bold">All Chefs</h2>
+              <p className="text-teal-600">Browse &amp; filter by cuisine</p>
             </div>
+
+            <button
+              onClick={() => setMapOpen(true)}
+              className="ml-auto inline-flex items-center rounded-lg bg-orange text-white px-4 py-2 hover:opacity-90"
+            >
+              Map view
+            </button>
           </div>
+
         </motion.div>
         </div>
 
@@ -127,6 +153,12 @@ export default function BrowsePage() {
         </motion.div>
         </div>
       </div>
+      {/* // 在 return 的最後面加 Modal（放在 <section> 裡也可）： */}
+      <Modal open={mapOpen} title="Chefs near Parramatta" onClose={() => setMapOpen(false)}>
+        <div className="h-[420px]">
+          <ChefMap chefs={list as any} radiusKm={10} />
+        </div>
+      </Modal>
     </section>
   );
 }

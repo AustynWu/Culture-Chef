@@ -178,4 +178,38 @@ export const chefs: Chef[] = [
   },
 ];
 
+// === 在檔案最下方加上：把缺少座標的補起來 ===
+const CENTER = { lat: -33.8138, lng: 151.0010 }; // Parramatta CBD
+const R_KM = 2.5; // 亂數半徑（公里）
+
+function seeded(id: string) {
+  // 把 id 變成 [0,1) 的穩定值
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  // 兩個不同的 0..1 值
+  const a = (Math.sin(h) + 1) / 2;
+  const b = (Math.sin(h * 1.7) + 1) / 2;
+  return { a, b };
+}
+
+function jitterAroundParramatta(id: string) {
+  const { a, b } = seeded(id);
+  // 極座標：距離用 sqrt 做均勻分布，角度 0..2π
+  const r = Math.sqrt(a) * R_KM;            // km
+  const theta = b * Math.PI * 2;
+  // km 轉經緯度（粗略）：1 deg lat ≈ 111km；lon 要乘以 cos(lat)
+  const dLat = r / 111;
+  const dLng = r / (111 * Math.cos((CENTER.lat * Math.PI) / 180));
+  return {
+    lat: CENTER.lat + dLat * Math.cos(theta),
+    lng: CENTER.lng + dLng * Math.sin(theta),
+  };
+}
+
+export const chefsWithGeo = chefs.map((c) =>
+  (typeof (c as any).lat === "number" && typeof (c as any).lng === "number")
+    ? c
+    : { ...c, ...jitterAroundParramatta(c.id) }
+);
+
 export default chefs;
