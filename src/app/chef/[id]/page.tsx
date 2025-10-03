@@ -11,13 +11,112 @@ import { useMode } from "@/components/mode-context";
 // ← 跟 browse 一樣引入 framer-motion 與 fadeIn
 import { motion } from "framer-motion";
 import { fadeIn } from "@/lib/variants";
+// review region
+import { useEffect, useMemo, useState } from "react";
+import { SEED_REVIEWS, type Review } from "@/data/reviews";
+
+
+
+// 固定用 UTC，手動組 YYYY/MM/DD，避免 SSR/CSR locale 差異
+function formatDateYMD(iso: string) {
+  const d = new Date(iso);
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  return `${y}/${m}/${day}`; // e.g. 2025/08/10
+}
+
+// calculate the rating star
+function useChefReviewStats(chefId: string) {
+  const [local, setLocal] = useState<Review[]>([]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const key = `reviews:${chefId}`;
+    const list = JSON.parse(localStorage.getItem(key) || "[]");
+    setLocal(list);
+  }, [chefId]);
+
+  const merged = useMemo(() => {
+    const seed = SEED_REVIEWS[chefId] ?? [];
+    const all = [...local, ...seed];
+    return all.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+  }, [chefId, local]);
+
+  const avg = merged.length
+    ? merged.reduce((s, r) => s + r.rating, 0) / merged.length
+    : 0;
+
+  return { avg, count: merged.length };
+}
+
+// read local review data
+function ReviewsList({ chefId }: { chefId: string }) {
+  const [local, setLocal] = useState<Review[]>([]);
+
+  // 讀 localStorage（只在 client）
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const key = `reviews:${chefId}`;
+    const list = JSON.parse(localStorage.getItem(key) || "[]");
+    setLocal(list);
+  }, [chefId]);
+
+  // 合併：localStorage（最新） + 種子
+  const merged = useMemo(() => {
+    const seed = SEED_REVIEWS[chefId] ?? [];
+    const all = [...local, ...seed];
+    return all.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+  }, [chefId, local]);
+
+  if (merged.length === 0) {
+    return <p className="text-gray-600">No reviews yet.</p>;
+  }
+
+  return (
+    <div className="grid gap-3 max-h-[360px] overflow-y-auto pr-2">
+      {merged.map((r) => (
+        <div key={r.id} className="rounded-xl border p-4 flex gap-3 items-start">
+          {/* avatar 先用姓名縮寫 */}
+          <div className="h-10 w-10 shrink-0 rounded-full bg-gray-200 flex items-center justify-center font-semibold text-gray-700">
+            {r.author.split(" ").map(s => s[0]).join("").slice(0,2)}
+          </div>
+          
+          {/* right side */}
+          <div className="min-w-0 flex-1">
+            {/* ← 這一排：左邊作者，右邊固定寬的日期 */}
+            <div className="flex items-center gap-3">
+              <div className="font-medium truncate">{r.author}</div>
+              <span className="ml-auto text-xs text-gray-500 tabular-nums min-w-[88px] text-right">
+                {formatDateYMD(r.createdAt)}
+              </span>
+            </div>
+
+            <div className="mt-0.5 text-orange">
+              {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
+            </div>
+            <p className="mt-1 text-sm text-gray-700">{r.text}</p>
+            {r.orderId && (
+              <div className="mt-1 text-xs text-gray-500">From order #{r.orderId}</div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+
 
 export default function ChefProfile({ params }: { params: { id: string } }) 
 {
   const router = useRouter();
   const { mode } = useMode();
 
-  const chef = chefs.find(c => c.id === params.id);
+  const chef = useMemo(() => chefs.find((c) => c.id === params.id), [params.id]);
+
+  // ✅ hooks 永遠同順序：這裡用 params.id
+  const { avg, count } = useChefReviewStats(params.id);
+
   if (!chef) return <main className="p-6">Chef not found.</main>;
 
   return (
@@ -78,7 +177,9 @@ export default function ChefProfile({ params }: { params: { id: string } })
                 <div className="px-[30px] py-[24px]">
                 <h1 className="text-2xl md:text-3xl font-bold mb-2">{chef.name}</h1>
                 <p className="text-gray-600 mb-2">{chef.cuisine.join(" · ")} · {chef.location}</p>
-                <p className="text-orange font-semibold">⭐ {chef.rating?.toFixed?.(1) ?? "4.5"}</p>
+                <p className="text-orange font-semibold">
+                  ⭐ {avg.toFixed(1)} <span className="text-gray-500">({count})</span>
+                </p>
             </div>
             </div>
             {/* 右邊：dishes 相簿 */}
@@ -160,23 +261,22 @@ export default function ChefProfile({ params }: { params: { id: string } })
               </motion.div>
             {/* </div> */}
 
+            
 
-          {/* <div className="bg-white shadow-2xl rounded-2xl p-[24px]">
-            <h2 className="mb-3">Menu</h2>
-            <ul className="divide-y">
-              {(chef.menu ?? []).map((m: any, i: number) => (
-                <li key={i} className="py-3 flex items-start justify-between">
-                  <div>
-                    <p className="font-medium">{m.title}</p>
-                    <p className="text-sm text-gray-600">{m.desc}</p>
-                  </div>
-                  <span className="font-semibold text-orange">${m.price}</span>
-                </li>
-              ))}
-            </ul>
-          </div> */}
 
         </div>
+        {/* // 在 return 裡「Reserve」卡片後面，加： */}
+        <motion.div
+          variants={fadeIn("up", 0.12)}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: false, amount: 0.1 }}
+          className="max-w-[1000px] mx-auto mt-8 bg-white shadow-2xl rounded-2xl p-[24px]"
+        >
+          <h2 className="mb-4">Reviews</h2>
+
+          <ReviewsList chefId={chef.id} />
+        </motion.div>
       </div>
     </main>
   );

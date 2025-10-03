@@ -214,8 +214,27 @@ export default function OrdersPage() {
     setReviewText("");
     setModal({ type: "review", order });
   }
+  
   function submitReview() {
-    // TODO: 將 rating + reviewText 存 CSV / 呼叫 API
+    if (!modal || modal.type !== "review" || !modal.order.chefId) {
+      setModal(null);
+      return;
+    }
+    const o = modal.order;
+    const review = {
+      id: `loc-${Date.now()}`,
+      chefId: o.chefId!,
+      author: "You",
+      rating,
+      text: reviewText.trim(),
+      createdAt: new Date().toISOString(),
+      orderId: o.id,
+    };
+
+    const key = `reviews:${o.chefId}`;
+    const list = JSON.parse(localStorage.getItem(key) || "[]");
+    localStorage.setItem(key, JSON.stringify([review, ...list]));
+
     setModal(null);
   }
 
