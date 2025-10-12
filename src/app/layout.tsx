@@ -4,6 +4,7 @@ import Providers from "./providers";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import QuizFab from "@/components/QuizFab";
 
 const lora = Lora({
   subsets: ["latin"],
@@ -35,6 +36,8 @@ export default function RootLayout({
         <Providers>
         <Header /> 
         {children}
+        {/* 右下角浮動測驗按鈕 */}
+        <QuizFab />
         <Footer /> 
         </Providers>
       </body>

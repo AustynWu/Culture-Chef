@@ -84,4 +84,23 @@ html { scroll-behavior: smooth; }
   box-shadow: 0 10px 24px rgba(0,0,0,.20);
 }
 
+/* thin, subtle scrollbar */
+.cc-thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #cfcfcf transparent;
+}
+.cc-thin-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.cc-thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.cc-thin-scroll::-webkit-scrollbar-thumb {
+  background: #cfcfcf;
+  border-radius: 9999px;
+}
+.cc-thin-scroll::-webkit-scrollbar-thumb:hover {
+  background: #b6b6b6;
+}
+
 @import "leaflet/dist/leaflet.css";
