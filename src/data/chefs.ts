@@ -66,7 +66,7 @@ export const chefs: Chef[] = [
     id: "amy-lin",
     name: "Amy Lin",
     avatar: "/chefs/amy-lin.jpg",
-    cuisine: ["Taiwanese", "Chinese"],
+    cuisine: ["Taiwanese"],
     location: "Parramatta, NSW",
     rating: 4.7,
     priceRange: "$$",

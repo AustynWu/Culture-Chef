@@ -262,12 +262,41 @@ export default function ChefProfile({ params }: { params: { id: string } })
                 className="w-full md:w-[400px] h-[300px] object-cover rounded-2xl"
                 />
                 <div className="px-[30px] py-[24px]">
-                <h1 className="text-2xl md:text-3xl font-bold mb-2">{chef.name}</h1>
-                <p className="text-gray-600 mb-2">{chef.cuisine.join(" · ")} · {chef.location}</p>
-                <p className="text-orange font-semibold">
-                  ⭐ {avg.toFixed(1)} <span className="text-gray-500">({count})</span>
-                </p>
-            </div>
+                  <h1 className="text-2xl md:text-3xl font-bold leading-tight">{chef.name}</h1>
+
+                  {/* Origin badges：更小、更緊 */}
+                  {(chef.origin?.country || chef.origin?.region || chef.origin?.city) && (
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      {chef.origin?.country && (
+                        <span className="inline-flex items-center rounded-full border px-2 py-2 text-[10px] leading-none">
+                          {chef.origin.country}
+                        </span>
+                      )}
+                      {chef.origin?.region && (
+                        <span className="inline-flex items-center rounded-full border px-2 py-2 text-[10px] leading-none">
+                          {chef.origin.region}
+                        </span>
+                      )}
+                      {chef.origin?.city && (
+                        <span className="inline-flex items-center rounded-full border px-2 py-2 text-[10px] leading-none">
+                          {chef.origin.city}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Cuisine · Location · Rating 同行 */}
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
+                    <span className="truncate">{chef.cuisine.join(" · ")}</span>
+                    <span className="text-gray-300">•</span>
+                    <span className="truncate">{chef.location}</span>
+                    <span className="text-gray-300">•</span>
+                    <span className="inline-flex items-center gap-1 text-orange font-semibold">
+                      <span aria-hidden>★</span>
+                      {avg.toFixed(1)} <span className="text-gray-500 font-normal">({count})</span>
+                    </span>
+                  </div>
+                </div>
             </div>
             {/* 右邊：dishes 相簿 */}
             <div className="p-4">
