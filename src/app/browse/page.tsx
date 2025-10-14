@@ -10,7 +10,7 @@ import Modal from "@/components/Modal";
 import { chefsWithGeo as chefs } from "@/data/chefs";
 import dynamic from "next/dynamic";
 import type { Chef as DataChef, MenuItem as DataMenuItem, SpiceLevel } from "@/data/chefs";
-
+import ScrollPills from "@/components/ScrollPills";
 
 // 最小型別（避免你的 data 欄位沒有就報錯）
 type MenuItem = DataMenuItem;  // 已含 dietaryTags?: string[], spiceLevel?: SpiceLevel
@@ -34,6 +34,19 @@ export default function BrowsePage() {
     (chefs as Chef[]).forEach((c) => (c.cuisine || []).forEach((x) => set.add(x)));
     return Array.from(set).sort();
   }, []);
+
+  // 取出唯一的 Region（來自 chef.origin.region）
+  const regions = useMemo(() => {
+    const set = new Set<string>();
+    (chefs as Chef[]).forEach((c) => {
+      const r = c.origin?.region?.trim();
+      if (r) set.add(r);
+    });
+    return ["All", ...Array.from(set).sort()];
+  }, []);
+
+  const [qRegion, setQRegion] = useState<string>("All");
+
 
   const [qCuisine, setQCuisine] = useState<string | null>(null);
 
@@ -61,6 +74,11 @@ export default function BrowsePage() {
   // 篩選後資料
   const list = useMemo(() => {
       let out = chefs as Chef[];
+
+      // 0) Region（新增）
+      if (qRegion && qRegion !== "All") {
+        out = out.filter((c) => c.origin?.region === qRegion);
+      }
 
       // 1) Culture（原本就有）
       if (qCuisine) {
@@ -92,7 +110,7 @@ export default function BrowsePage() {
       }
 
       return out;
-    }, [qCuisine, qDietary, qSpice, qHalalVerified]);
+    }, [qRegion, qCuisine, qDietary, qSpice, qHalalVerified]);
 
   // 取得「from $」價格（看 menu 最低價；無則顯示 priceRange）
   const getFromPrice = (c: Chef) => {
@@ -163,8 +181,27 @@ export default function BrowsePage() {
           {/* —— 強制換行（保留外層 inline-flex 與漂浮） —— */}
           <div className="basis-full h-0" />
 
+          {/* ADD ↓ Region（Pills） */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-gray-600 px-1">Region:</span>
+            {regions.map((r) => (
+              <button
+                key={r}
+                onClick={() => setQRegion(r)}
+                className={`px-3 py-1 rounded-full border ${
+                  qRegion === r ? "bg-orange shadow" : "hover:bg-orange"
+                }`}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
+
+          {/* —— 強制換行（保留外層 inline-flex 與漂浮） —— */}
+          <div className="basis-full h-0" />
+
           {/* ADD ↓ Dietary 多選 */}
-          <div className="flex flex-wrap items-center gap-2 mt-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-gray-600 px-1">Dietary:</span>
             {/* Dietary 多選 */}
             {DIETARY.map((d) => (
@@ -193,11 +230,22 @@ export default function BrowsePage() {
             ))}
           </div>
 
+          {/* <button
+            onClick={() => {
+              setQRegion("All");
+              setQCuisine(null);
+              // 若還有其他條件，一併清掉
+            }}
+            className="text-xs underline text-gray-500 hover:text-gray-800"
+          >
+            Reset filters
+          </button> */}
+
           {/* —— 強制換行（保留外層 inline-flex 與漂浮） —— */}
           <div className="basis-full h-0" />
           
           {/* ADD ↓ Halal verified 勾選 */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* <div className="flex flex-wrap items-center gap-2">
             <label className="text-xs text-gray-600 text-black px-1">Halal verified:</label>
             <button
               onClick={() => setQHalalVerified(v => !v)}
@@ -205,7 +253,7 @@ export default function BrowsePage() {
             >
               {qHalalVerified ? "Only verified" : "Include all"}
             </button>
-          </div>
+          </div> */}
           </div>
         </div>
 
@@ -231,10 +279,17 @@ export default function BrowsePage() {
               </div>
               <div className="pt-[20px] pb-[28px] px-[30px]">
                 <Link href={`/chef/${c.id}`}>
-                  <h3 className="font-poppins text-black mb-[14px]">
+                  <h3 className="font-poppins text-black mb-[8px]">
                     {c.name} — {(c.cuisine || []).slice(0, 2).join(" / ")}
                   </h3>
                 </Link>
+
+                {c.origin?.region && (
+                  <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs mb-2">
+                    {c.origin.region}
+                  </span>
+                )}
+
                 <div className="text-xl font-poppins font-semibold text-orange">
                   {getFromPrice(c)}
                 </div>

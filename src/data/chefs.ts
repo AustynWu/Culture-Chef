@@ -29,6 +29,35 @@ export type Chef = {
   // 新增（可被 browse 使用的主廚層級標記；不影響既有功能）
   capabilities?: ("vegan" | "vegetarian" | "halal")[];
   halalVerified?: boolean;
+
+    origin?: Origin;
+  regionalNotes?: string[];      // short bullets about local taste
+  flavorProfile?: FlavorProfile; // 1–5 scale
+  specialties?: string[];        // e.g., ["Hakka", "Night-market"]
+  techniques?: string[];         // e.g., ["Knife skills – fine julienne"]
+  signature?: SignatureDish[];   // 3 highlighted dishes
+};
+
+// New types
+export type FlavorProfile = {
+  salty: 1|2|3|4|5;
+  sweet: 1|2|3|4|5;
+  spicy: 1|2|3|4|5;
+  herbaceous: 1|2|3|4|5; // herbs/spices freshness
+  umami: 1|2|3|4|5;
+  oily: 1|2|3|4|5;
+};
+
+export type SignatureDish = {
+  title: string;        // must match an item already in menu.title
+  shortStory: string;   // 1–2 sentences about region/technique
+  regionTag?: string;   // e.g., "Tainan-sweet", "North Taiwan salty"
+};
+
+export type Origin = {
+  country: string;      // e.g., "Taiwan"
+  region?: string;      // e.g., "South Taiwan"
+  city?: string;        // e.g., "Tainan"
 };
 // ---------------------------------
 
@@ -63,6 +92,19 @@ export const chefs: Chef[] = [
       "three_cup_chicken.jpeg",
     ],
     capabilities: [], // 目前不特別主打
+    origin: { country: "Taiwan", region: "South Taiwan", city: "Tainan" },
+    regionalNotes: [
+      "South Taiwan leans rounder and slightly sweet.",
+      "Uses soy paste (thicker, mildly sweet) for gloss and body.",
+    ],
+    flavorProfile: { salty: 3, sweet: 4, spicy: 1, herbaceous: 3, umami: 5, oily: 2 },
+    specialties: ["Night-market small plates", "Home-style braise", "Ban-doh banquet classics"],
+    techniques: ["Sugar–soy caramel (tang-se)", "High-heat wok searing", "Knife skills – fine julienne"],
+    signature: [
+      { title: "Lu Rou Fan", shortStory: "Braised pork with a gentle sweet finish, Tainan-style glossy soy paste.", regionTag: "Tainan-sweet" },
+      { title: "Beef Noodle Soup", shortStory: "Rich bone broth, clean spice; Taipei influence but balanced for southern palates.", regionTag: "North Taiwan salty" },
+      { title: "Three-cup Chicken", shortStory: "Rice wine forward, basil aromatics; sauce reduced to a sticky sheen.", regionTag: "Island classic" },
+    ],
   },
   {
     id: "raj-singh",
@@ -95,6 +137,19 @@ export const chefs: Chef[] = [
     ],
     capabilities: ["vegetarian", "halal"],
     halalVerified: false,
+    origin: { country: "India", region: "North India", city: "Delhi" },
+    regionalNotes: [
+      "North Indian gravies: dairy-enriched, warm garam masala.",
+      "Tandoor breads balance rich curries.",
+    ],
+    flavorProfile: { salty: 3, sweet: 2, spicy: 3, herbaceous: 4, umami: 4, oily: 3 },
+    specialties: ["Punjabi curries", "Tandoor", "Festive sweets"],
+    techniques: ["Bhuna (slow frying spice paste)", "Tandoor baking", "Tempering (tadka)"],
+    signature: [
+      { title: "Butter Chicken", shortStory: "Delhi-style silky tomato gravy finished with butter and kasuri methi.", regionTag: "Delhi-Punjabi" },
+      { title: "Chole Bhature", shortStory: "Spiced chickpeas with fluffy fried bread; classic Delhi street breakfast.", regionTag: "Delhi street" },
+      { title: "Lamb Rogan Josh", shortStory: "Kashmiri chilli aroma, yogurt base—heat is fragrant more than fiery.", regionTag: "Kashmir" },
+    ],
   },
   {
     id: "maria-rossi",
@@ -125,6 +180,20 @@ export const chefs: Chef[] = [
     ],
     capabilities: ["vegetarian", "vegan"],
     halalVerified: false,
+    origin: { country: "Italy", region: "Central Italy", city: "Rome" },
+    regionalNotes: [
+      "Central Italian sauces: pecorino, guanciale, olive oil richness.",
+      "Tomato forward but balanced; less garlic than southern styles.",
+    ],
+    flavorProfile: { salty: 3, sweet: 1, spicy: 1, herbaceous: 3, umami: 4, oily: 3 },
+    specialties: ["Roman pasta", "Wood-oven pizza", "Dolci"],
+    techniques: ["Emulsifying pasta water", "Dough fermentation", "Gentle zabaglione whip"],
+    signature: [
+      { title: "Spaghetti Carbonara", shortStory: "Roman classic—no cream, just egg, pecorino, and guanciale emulsion.", regionTag: "Rome" },
+      { title: "Margherita Pizza", shortStory: "Long-fermented dough, leopard-spotted cornicione, San Marzano tomatoes.", regionTag: "Neapolitan technique" },
+      { title: "Tiramisu", shortStory: "Light mascarpone mousse, espresso-soaked ladyfingers—bittersweet balance.", regionTag: "Veneto roots" },
+    ],
+
   },
   {
     id: "sakura-tanaka",
@@ -154,6 +223,20 @@ export const chefs: Chef[] = [
     ],
     capabilities: ["vegetarian"],
     halalVerified: false,
+    origin: { country: "Japan", region: "Kansai", city: "Osaka" },
+    regionalNotes: [
+      "Kansai broths: lighter, kombu-forward dashi; soy is softer.",
+      "Street classics like okonomiyaki favor sweetness–umami harmony.",
+    ],
+    flavorProfile: { salty: 2, sweet: 2, spicy: 1, herbaceous: 3, umami: 5, oily: 2 },
+    specialties: ["Kansai okonomiyaki", "Dashi work", "Cutlet frying"],
+    techniques: ["Katsu crisping (twice-fry)", "Kombu-katsuobushi dashi extraction", "Rice polishing & wash"],
+    signature: [
+      { title: "Okonomiyaki", shortStory: "Osaka-style savory pancake—airy batter, crisp edges, bonito finish.", regionTag: "Kansai" },
+      { title: "Miso Ramen", shortStory: "House dashi blended with miso tare; clean, layered umami.", regionTag: "Hybrid style" },
+      { title: "Karaage Chicken", shortStory: "Soy–ginger marinade and potato starch coat for extra crunch.", regionTag: "Izakaya classic" },
+    ],
+
   },
   {
     id: "sofia-gomez",
@@ -184,6 +267,21 @@ export const chefs: Chef[] = [
     ],
     capabilities: ["vegan", "vegetarian"],
     halalVerified: false,
+    origin: { country: "Mexico", region: "Central Mexico", city: "Puebla" },
+    regionalNotes: [
+      "Central flavors: toasted seeds, chocolate–chilli moles, bright salsas.",
+      "Corn nixtamalization drives aroma and texture.",
+    ],
+    flavorProfile: { salty: 3, sweet: 2, spicy: 3, herbaceous: 4, umami: 4, oily: 3 },
+    specialties: ["Moles", "Nixtamal tortillas", "Street tacos"],
+    techniques: ["Dry toasting (comal)", "Mole grinding", "Nixtamal masa hand-press"],
+    signature: [
+      { title: "Mole Poblano", shortStory: "Bittersweet depth from chillies, seeds, and a touch of chocolate.", regionTag: "Puebla" },
+      { title: "Tacos al Pastor", shortStory: "Achiote-marinated pork, pineapple finish; shawarma heritage.", regionTag: "CDMX street" },
+      { title: "Chilaquiles", shortStory: "Crisp tortillas tossed in salsa verde, crema and queso fresco.", regionTag: "Central brunch" },
+    ],
+
+
   },
   {
     id: "ali-hassan",
@@ -216,6 +314,20 @@ export const chefs: Chef[] = [
     ],
     capabilities: ["halal", "vegan", "vegetarian"],
     halalVerified: true, // 清真菜系主打，提供「已驗證」篩選可用
+    origin: { country: "Lebanon", region: "Levant", city: "Beirut" },
+    regionalNotes: [
+      "Levantine balance: lemon brightness, parsley freshness, tahini creaminess.",
+      "Charcoal grill for smoky depth; mezze culture.",
+    ],
+    flavorProfile: { salty: 3, sweet: 1, spicy: 2, herbaceous: 5, umami: 4, oily: 3 },
+    specialties: ["Mezze", "Charcoal grill", "Pickling"],
+    techniques: ["Tahini emulsion", "Skewer shaping (kofta)", "Charred veg purée (baba ghanoush)"],
+    signature: [
+      { title: "Chicken Shawarma Wrap", shortStory: "Yogurt–spice marinade shaved thin; garlic toum brightens.", regionTag: "Beirut street" },
+      { title: "Falafel & Hummus Platter", shortStory: "Herb-green falafel with light, silky hummus.", regionTag: "Levant mezze" },
+      { title: "Kibbeh", shortStory: "Cracked wheat shell with spiced mince—baked for a gentle crust.", regionTag: "Family feast" },
+    ],
+
   },
 ];
 

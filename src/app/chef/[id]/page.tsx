@@ -17,6 +17,50 @@ import { SEED_REVIEWS, type Review } from "@/data/reviews";
 
 
 
+
+// Small helper: 1–5 dot scale for flavor profile
+function FlavorDots({ label, value }: { label: string; value?: number }) {
+  const num = Number(value ?? 0);
+  const v = Math.min(Math.max(isNaN(num) ? 0 : num, 0), 5);
+
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="w-28 shrink-0 text-sm text-gray-700">{label}</span>
+      <div className="flex gap-1">
+        {Array.from({ length: 5 }).map((_, i) => {
+          const filled = i < v;
+          return (
+            <span
+              key={i}
+              aria-hidden="true"
+              className={[
+                "inline-block rounded-full h-2 w-2",
+                filled ? "bg-[#f59e0b]" : "bg-white border border-[#f59e0b]",
+              ].join(" ")}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Small helper: pill tags
+function Pills({ items, emptyText }: { items?: string[]; emptyText?: string }) {
+  if (!items || items.length === 0) {
+    return <p className="text-sm text-gray-500">{emptyText ?? "—"}</p>;
+  }
+  return (
+    <div className="flex flex-wrap gap-2">
+      {items.map((x) => (
+        <span key={x} className="inline-flex items-center rounded-full border px-2.5 py-1 text-xs">
+          {x}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 // 固定用 UTC，手動組 YYYY/MM/DD，避免 SSR/CSR locale 差異
 function formatDateYMD(iso: string) {
   const d = new Date(iso);
@@ -266,20 +310,108 @@ export default function ChefProfile({ params }: { params: { id: string } })
             className="bg-white shadow-2xl rounded-2xl p-[24px]"
           >
             <h2 className="mb-3">About the chef</h2>
-            <p className="text-gray-700 leading-relaxed">{chef.bio ?? "Home-style dishes with seasonal ingredients."}</p>
-            <br></br>
-            <h2 className="mb-3">Menu</h2>
-            <ul className="divide-y">
-              {(chef.menu ?? []).map((m: any, i: number) => (
-                <li key={i} className="py-3 flex items-start justify-between">
-                  <div>
-                    <p className="font-medium">{m.title}</p>
-                    <p className="text-sm text-gray-600">{m.desc}</p>
+            <p className="text-gray-700 leading-relaxed text-sm">
+              {chef.bio ?? "Home-style dishes with seasonal ingredients."}
+            </p>
+
+            {/* Origin & Region */}
+            {(chef.origin?.country || chef.origin?.region || chef.origin?.city) && (
+              <section className="mt-6">
+                <h3 className="text-lg font-semibold mb-2">Origin &amp; Region</h3>
+                <div className="flex flex-wrap gap-2">
+                  {chef.origin?.country && (
+                    <span className="inline-flex items-center rounded-full border px-2.5 py-1 text-xs">
+                      {chef.origin.country}
+                    </span>
+                  )}
+                  {chef.origin?.region && (
+                    <span className="inline-flex items-center rounded-full border px-2.5 py-1 text-xs">
+                      {chef.origin.region}
+                    </span>
+                  )}
+                  {chef.origin?.city && (
+                    <span className="inline-flex items-center rounded-full border px-2.5 py-1 text-xs">
+                      {chef.origin.city}
+                    </span>
+                  )}
+                </div>
+              </section>
+            )}
+
+            {/* Regional notes */}
+            {(chef.regionalNotes && chef.regionalNotes.length > 0) && (
+              <section className="mt-6">
+                <h3 className="text-lg font-semibold mb-2">Regional notes</h3>
+                <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
+                  {chef.regionalNotes.map((n: string, i: number) => (
+                    <li key={i}>{n}</li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* Flavor profile */}
+            {chef.flavorProfile && (
+              <section className="mt-6">
+                <h3 className="text-lg font-semibold mb-2">Flavor profile</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <FlavorDots label="Salty"      value={chef.flavorProfile.salty} />
+                  <FlavorDots label="Sweet"      value={chef.flavorProfile.sweet} />
+                  <FlavorDots label="Spicy"      value={chef.flavorProfile.spicy} />
+                  <FlavorDots label="Herbaceous" value={chef.flavorProfile.herbaceous} />
+                  <FlavorDots label="Umami"      value={chef.flavorProfile.umami} />
+                  <FlavorDots label="Oily"       value={chef.flavorProfile.oily} />
+                </div>
+              </section>
+
+            )}
+
+            {/* Specialties */}
+            {(chef.specialties && chef.specialties.length > 0) && (
+              <section className="mt-6">
+                <h3 className="text-lg font-semibold mb-2">Specialties</h3>
+                <Pills items={chef.specialties} />
+              </section>
+            )}
+
+            {/* Techniques */}
+            {(chef.techniques && chef.techniques.length > 0) && (
+              <section className="mt-6">
+                <h3 className="text-lg font-semibold mb-2">Techniques</h3>
+                <Pills items={chef.techniques} />
+              </section>
+            )}
+
+            {/* === Collapsible Full Menu === */}
+            <section className="mt-10">
+              <details className="group rounded-2xl border p-4 open:shadow-sm">
+                <summary className="cursor-pointer list-none">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-2xl font-semibold tracking-tight">
+                      Full menu
+                    </h3>
+                    <span className="text-sm text-muted-foreground">
+                      expand
+                    </span>
                   </div>
-                  <span className="font-semibold text-orange">${m.price}</span>
-                </li>
-              ))}
-            </ul>
+                </summary>
+
+                {/* 原本你的 Menu 列表從這裡開始搬進來 */}
+                <h2 className="mb-3">Menu</h2>
+                  <ul className="divide-y">
+                    {(chef.menu ?? []).map((m: any, i: number) => (
+                      <li key={i} className="py-3 flex items-start justify-between">
+                        <div>
+                          <p className="font-medium">{m.title}</p>
+                          <p className="text-sm text-gray-600">{m.desc}</p>
+                        </div>
+                        <span className="font-semibold text-orange">${m.price}</span>
+                      </li>
+                    ))}
+                  </ul>
+              </details>
+            </section>
+
           </motion.div>
 
                 {/* Reserve */}
